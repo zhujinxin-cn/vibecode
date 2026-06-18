@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Item Reviewer | Mockup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        primary: '#6366f1', // Indigo
+                        accent: '#8b5cf6', // Violet
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar for sleek look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-sidebar {
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Input styling */
+        .option-radio:checked + div {
+            border-color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.1);
+            color: white;
+        }
+        
+        body {
+            background-color: #020617;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+    </style>
+</head>
+<body class="text-slate-300 h-screen w-screen overflow-hidden flex selection:bg-primary selection:text-white">
+
+    <!-- SIDEBAR: Navigation & Filters -->
+    <aside class="glass-sidebar w-80 flex-shrink-0 flex flex-col h-full z-20 shadow-2xl">
+        <!-- Logo Area -->
+        <div class="h-16 flex items-center px-6 border-b border-slate-800">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold mr-3 shadow-lg shadow-primary/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <h1 class="text-lg font-semibold tracking-tight text-white">Survey<span class="text-primary">Sentry</span></h1>
+        </div>
+
+        <!-- Filters -->
+        <div class="p-4 space-y-1">
+            <button onclick="filterItems('all')" id="filter-all" class="w-full text-left px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 bg-slate-800 text-white shadow-sm">
+                All Items
+            </button>
+            <button onclick="filterItems('pending')" id="filter-pending" class="w-full text-left px-4 py-2.5 rounded-md text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200">
+                Pending Review
+                <span id="badge-pending" class="ml-auto bg-primary/20 text-primary text-xs px-2 py-0.5 rounded-full float-right">3</span>
+            </button>
+            <button onclick="filterItems('approved')" id="filter-approved" class="w-full text-left px-4 py-2.5 rounded-md text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200">
+                Approved
+            </button>
+            <button onclick="filterItems('rejected')" id="filter-rejected" class="w-full text-left px-4 py-2.5 rounded-md text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200">
+                Rejected
+            </button>
+        </div>
+
+        <div class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Project: Q3 Product Pulse</div>
+
+        <!-- Item List -->
+        <div id="item-list" class="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
+            <!-- Items will be injected here via JS -->
+        </div>
+
+        <!-- User Profile -->
+        <div class="h-16 border-t border-slate-800 flex items-center px-6 bg-slate-950/50">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-400 to-cyan-500 mr-3"></div>
+            <div class="flex-1">
+                <div class="text-sm font-medium text-white">Sarah Jenkins</div>
+                <div class="text-xs text-slate-500">Senior Researcher</div>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500 hover:text-white cursor-pointer transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT: Reviewer -->
+    <main class="flex-1 flex flex-col h-full relative overflow-hidden">
+        
+        <!-- Empty State (Hidden by default) -->
+        <div id="empty-state" class="hidden absolute inset-0 flex flex-col items-center justify-center text-slate-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+            <p class="text-lg font-medium">Select an item to review</p>
+        </div>
+
+        <!-- Detail View -->
+        <div id="review-panel" class="flex flex-col h-full animate-fade-in">
+            
+            <!-- Header -->
+            <header class="h-16 border-b border-slate-800 flex items-center justify-between px-8 bg-slate-900/50 backdrop-blur-sm">
+                <div class="flex items-center space-x-4">
+                    <span id="detail-id" class="text-xs font-mono text-slate-500 bg-slate-800 px-2 py-1 rounded">ID: #001</span>
+                    <span id="detail-type" class="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded border border-primary/20 uppercase">Multiple Choice</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="text-right">
+                        <div class="text-xs text-slate-500">Created By</div>
+                        <div class="text-sm text-slate-300">UX Team</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs text-slate-500">Last Modified</div>
+                        <div class="text-sm text-slate-300">2 hours ago</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-8">
+                <div class="max-w-3xl mx-auto">
+                    
+                    <!-- Question Card -->
+                    <div class="glass-panel rounded-2xl p-8 mb-8 shadow-xl relative overflow-hidden group">
+                        <!-- Decorative Glow -->
+                        <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+
+                        <div class="mb-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Question Text</label>
+                            <h2 id="detail-text" class="text-2xl font-medium text-white leading-relaxed">
+                                On a scale of 0 to 10, how likely are you to recommend our product to a friend or colleague?
+                            </h2>
+                        </div>
+
+                        <div id="detail-logic-hint" class="mt-4 text-xs text-amber-500/80 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                            Requires: Logic skip if score < 7
+                        </div>
+                    </div>
+
+                    <!-- Preview Interaction Area -->
+                    <div class="mb-8">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Interaction Preview</label>
+                        
+                        <div id="preview-container" class="bg-slate-900 border border-slate-700 rounded-xl p-6 min-h-[120px] flex items-center justify-center relative">
+                            <!-- Preview content injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="mb-24">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Review Notes</label>
+                        <div class="space-y-4" id="comments-list">
+                            <!-- Comments injected here -->
+                        </div>
+                        <div class="mt-4 flex gap-2">
+                            <input type="text" id="comment-input" placeholder="Add a review note..." class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow">
+                            <button onclick="addComment()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Post</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Sticky Action Bar -->
+            <div class="absolute bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-700 p-4 px-8 flex items-center justify-between shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-30">
+                <div class="text-sm text-slate-400" id="action-status-text">Awaiting decision...</div>
+                <div class="flex gap-4">
+                    <button onclick="rejectItem()" id="btn-reject" class="group relative px-6 py-2.5 bg-slate-800 hover:bg-rose-500/20 hover:text-rose-400 text-slate-300 rounded-lg transition-all duration-200 font-medium border border-transparent hover:border-rose-500/50 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                        Reject
+                    </button>
+                    
+                    <button onclick="approveItem()" id="btn-approve" class="group px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all duration-200 font-medium shadow-lg shadow-emerald-500/20 flex items-center gap-2 transform hover:-translate-y-0.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                        </svg>
+                        Approve Item
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- DATA & STATE ---
+        const items = [
+            {
+                id: "Q-1001",
+                text: "How frequently do you use our mobile application?",
+                type: "Multiple Choice",
+                status: "pending", // pending, approved, rejected
+                options: ["Daily", "Weekly", "Monthly", "Rarely", "Never"],
+                comments: [],
+                meta: "Logic: Skip to section 3 if Never"
+            },
+            {
+                id: "Q-1002",
+                text: "On a scale of 1 to 10, how likely are you to recommend our product to a colleague?",
+                type: "Rating Scale",
+                status: "pending",
+                options: [], // Special handling for scale
+                comments: [{author: "UX Team", text: "Make sure the scale starts at 0, not 1."}],
+                meta: "Format: NPS Style"
+            },
+            {
+                id: "Q-1003",
+                text: "What is the primary reason for your rating above?",
+                type: "Open Text",
+                status: "pending",
+                options: [],
+                comments: [],
+                meta: "Required if rating < 8"
+            },
+            {
+                id: "Q-1004",
+                text: "Which features do you value most? (Select all that apply)",
+                type: "Checkboxes",
+                status: "approved",
+                options: ["Speed", "Security", "User Interface", "Customer Support"],
+                comments: [{author: "Sarah", text: "Options look good."}],
+                meta: "Multi-select enabled"
+            },
+            {
+                id: "Q-1005",
+                text: "Which subscription plan are you currently on?",
+                type: "Dropdown",
+                status: "rejected",
+                options: ["Free", "Pro", "Enterprise"],
+                comments: [{author: "Legal", text: "Copyright year in footer needs update on this page."}],
+                meta: "Hidden logic active"
+            }
+        ];
+
+        let currentFilter = 'all';
+        let activeItemId = items[0].id; // Start with first item
+
+        // --- DOM ELEMENTS ---
+        const itemListEl = document.getElementById('item-list');
+        const detailPanel = document.getElementById('review-panel');
+        const emptyState = document.getElementById('empty-state');
+        
+        // Detail Elements
+        const detailId = document.getElementById('detail-id');
+        const detailType = document.getElementById('detail-type');
+        const detailText = document.getElementById('detail-text');
+        const detailLogic = document.getElementById('detail-logic-hint');
+        const previewContainer = document.getElementById('preview-container');
+        const commentsList = document.getElementById('comments-list');
+        const statusText = document.getElementById('action-status-text');
+        const btnApprove = document.getElementById('btn-approve');
+        const btnReject = document.getElementById('btn-reject');
+
+        // --- INITIALIZATION ---
+        function init() {
+            renderList();
+            loadItem(activeItemId);
+        }
+
+        // --- RENDERING ---
+
+        function renderList() {
+            itemListEl.innerHTML = '';
+            
+            const filtered = items.filter(item => {
+                if (currentFilter === 'all') return true;
+                return item.status === currentFilter;
+            });
+
+            if (filtered.length === 0) {
+                itemListEl.innerHTML = `<div class="text-center text-slate-600 text-xs py-8">No items found</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const isActive = item.id === activeItemId;
+                let statusColor = 'bg-slate-500';
+                let statusText = 'Draft';
+                
+                if(item.status === 'approved') { statusColor = 'bg-emerald-500'; statusText = 'Appr.'; }
+                if(item.status === 'rejected') { statusColor = 'bg-rose-500'; statusText = 'Rej.'; }
+                if(item.status === 'pending') { statusColor = 'bg-amber-500'; statusText = 'Rev.'; }
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl cursor-pointer transition-all duration-200 border ${isActive ? 'bg-slate-800 border-primary/50 shadow-lg' : 'bg-transparent border-slate-800 hover:bg-slate-800/50 hover:border-slate-700'}`;
+                card.onclick = () => {
+                    activeItemId = item.id;
+                    renderList(); // Re-render to update active state
+                    loadItem(item.id);
+                };
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-mono text-slate-500">${item.id}</span>
+                        <span class="w-2 h-2 rounded-full ${statusColor}" title="${statusText}"></span>
+                    </div>
+                    <h3 class="text-sm text-slate-300 font-medium line-clamp-2 leading-snug">${item.text}</h3>
+                    <div class="mt-3 flex items-center gap-2">
+                         <span class="text-[10px] px-2 py-0.5 rounded bg-slate-900 text-slate-500 border border-slate-700">${item.type}</span>
+                    </div>
+                `;
+                itemListEl.appendChild(card);
+            });
+            
+            updateBadges();
+        }
+
+        function loadItem(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            // Trigger animation re-flow
+            detailPanel.classList.remove('animate-fade-in');
+            void detailPanel.offsetWidth; 
+            detailPanel.classList.add('animate-fade-in');
+
+            // Populate Data
+            detailId.innerText = `ID: ${item.id}`;
+            detailType.innerText = item.type;
+            detailText.innerText = item.text;
+            detailLogic.innerText = item.meta ? `Note: ${item.meta}` : '';
+            detailLogic.style.display = item.meta ? 'flex' : 'none';
+
+            // Render Preview based on Type
+            renderPreview(item);
+
+            // Render Comments
+            renderComments(item);
+
+            // Update Status UI
+            updateActionButtons(item.status);
+        }
+
+        function renderPreview(item) {
+            previewContainer.innerHTML = '';
+            
+            if (item.type === 'Multiple Choice') {
+                const wrapper = document.createElement('div');
+                wrapper.className = "w-full space-y-3";
+                item.options.forEach((opt, idx) => {
+                    const id = `opt-${idx}`;
+                    wrapper.innerHTML += `
+                        <label class="flex items-center space-x-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-800 transition-colors group">
+                            <input type="radio" name="preview-opt" class="w-4 h-4 text-primary border-slate-600 focus:ring-primary bg-slate-800">
+                            <span class="text-slate-300 text-sm group-hover:text-white">${opt}</span>
+                        </label>
+                    `;
+                });
+                previewContainer.appendChild(wrapper);
+            } 
+            else if (item.type === 'Checkboxes') {
+                const wrapper = document.createElement('div');
+                wrapper.className = "w-full grid grid-cols-2 gap-3";
+                item.options.forEach((opt, idx) => {
+                     wrapper.innerHTML += `
+                        <label class="flex items-center space-x-3 p-3 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-800 transition-colors">
+                            <input type="checkbox" class="w-4 h-4 text-primary border-slate-600 rounded focus:ring-primary bg-slate-800">
+                            <span class="text-slate-300 text-sm hover:text-white">${opt}</span>
+                        </label>
+                    `;
+                });
+                previewContainer.appendChild(wrapper);
+            }
+            else if (item.type === 'Rating Scale') {
+                const wrapper = document.createElement('div');
+                wrapper.className = "w-full flex flex-col items-center space-y-4";
+                
+                let buttons = '';
+                for(let i=0; i<=10; i++) {
+                    buttons += `<button class="w-8 h-8 rounded-full text-xs font-mono border border-slate-700 hover:border-primary hover:text-primary hover:bg-primary/10 transition-all text-slate-400 focus:ring-2 focus:ring-primary">${i}</button>`;
+                }
+                
+                wrapper.innerHTML = `
+                    <div class="flex items-center justify-between w-full text-xs text-slate-500 px-2">
+                        <span>Not likely</span>
+                        <span>Very likely</span>
+                    </div>
+                    <div class="flex justify-between w-full gap-1">${buttons}</div>
+                `;
+                previewContainer.appendChild(wrapper);
+            }
+            else if (item.type === 'Open Text') {
+                previewContainer.innerHTML = `
+                    <textarea class="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" rows="3" placeholder="Type your answer here..."></textarea>
+                    <div class="absolute bottom-2 right-2 text-xs text-slate-600">0/500</div>
+                `;
+            }
+             else {
+                 previewContainer.innerHTML = `<div class="text-slate-500 text-sm italic">Preview not available for ${item.type}</div>`;
+            }
+        }
+
+        function renderComments(item) {
+            commentsList.innerHTML = '';
+            if(item.comments.length === 0) {
+                commentsList.innerHTML = '<div class="text-xs text-slate-600 italic">No notes yet.</div>';
+            } else {
+                item.comments.forEach(c => {
+                    const div = document.createElement('div');
+                    div.className = "bg-slate-800/50 p-3 rounded-lg border border-slate-800 text-sm";
+                    div.innerHTML = `<span class="font-bold text-slate-300 text-xs block mb-1">${c.author}</span>${c.text}`;
+                    commentsList.appendChild(div);
+                });
+            }
+        }
+
+        function updateActionButtons(status) {
+            // Reset
+            btnApprove.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-700');
+            btnApprove.classList.add('bg-emerald-600');
+            btnReject.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-800');
+            btnReject.classList.add('text-slate-300');
+            
+            if (status === 'approved') {
+                statusText.innerHTML = `<span class="text-emerald-400 font-medium">Approved</span>`;
+                btnApprove.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-700');
+                btnApprove.classList.remove('bg-emerald-600', 'hover:bg-emerald-500');
+            } else if (status === 'rejected') {
+                statusText.innerHTML = `<span class="text-rose-400 font-medium">Rejected</span>`;
+                btnReject.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-800');
+                btnReject.classList.remove('hover:bg-rose-500/20', 'hover:text-rose-400');
+            } else {
+                statusText.innerHTML = `Awaiting decision...`;
+            }
+        }
+
+        // --- INTERACTIONS ---
+
+        function filterItems(filterType) {
+            currentFilter = filterType;
+            
+            // Update tab styles
+            ['all', 'pending', 'approved', 'rejected'].forEach(t => {
+                const btn = document.getElementById(`filter-${t}`);
+                if (t === filterType) {
+                    btn.classList.remove('text-slate-400', 'hover:bg-slate-800/50');
+                    btn.classList.add('bg-slate-800', 'text-white', 'shadow-sm');
+                } else {
+                    btn.classList.add('text-slate-400', 'hover:bg-slate-800/50');
+                    btn.classList.remove('bg-slate-800', 'text-white', 'shadow-sm');
+                }
+            });
+
+            renderList();
+        }
+
+        function updateBadges() {
+            const pendingCount = items.filter(i => i.status === 'pending').length;
+            document.getElementById('badge-pending').innerText = pendingCount;
+        }
+
+        function approveItem() {
+            const item = items.find(i => i.id === activeItemId);
+            if (!item || item.status === 'approved') return;
+
+            // Optimistic Update
+            const oldStatus = item.status;
+            item.status = 'approved';
+            
+            // Visual Feedback
+            loadItem(activeItemId);
+            renderList();
+
+            // Animation effect on button
+            const originalText = btnApprove.innerHTML;
+            btnApprove.innerHTML = `
+                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Saving...
+            `;
+            
+            setTimeout(() => {
+                btnApprove.innerHTML = originalText;
+            }, 500);
+        }
+
+        function rejectItem() {
+            const item = items.find(i => i.id === activeItemId);
+            if (!item || item.status === 'rejected') return;
+
+            item.status = 'rejected';
+            
+            // Add a default rejection note if none exists
+            if(!item.comments.some(c => c.text.includes("Rejected by"))) {
+                item.comments.push({author: "System", text: "Item rejected by reviewer."});
+            }
+
+            loadItem(activeItemId);
+            renderList();
+        }
+
+        function addComment() {
+            const input = document.getElementById('comment-input');
+            const text = input.value.trim();
+            if(!text) return;
+
+            const item = items.find(i => i.id === activeItemId);
+            item.comments.push({author: "Sarah", text: text});
+            
+            input.value = '';
+            loadItem(activeItemId); // Refresh to show new comment
+        }
+
+        // Handle Enter key in comment input
+        document.getElementById('comment-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                addComment();
+            }
+        });
+
+        // Run
+        init();
+
+    </script>
+</body>
+</html>
